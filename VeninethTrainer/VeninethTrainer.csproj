@@ -7,7 +7,10 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <RootNamespace>VeninethTrainer.Avalonia</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ApplicationIcon>Ghostrunner_101.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>

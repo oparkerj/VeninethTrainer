@@ -7,7 +7,7 @@ using System.Linq;
 
 // Note: Please be careful when modifying this because it could break existing components!
 
-namespace VeninethTrainer.Avalonia
+namespace VeninethTrainer
 {
     public class MemoryWatcherList : List<MemoryWatcher>
     {

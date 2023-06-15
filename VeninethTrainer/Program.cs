@@ -1,7 +1,7 @@
-﻿using Avalonia;
-using System;
+﻿using System;
+using Avalonia;
 
-namespace VeninethTrainer.Avalonia;
+namespace VeninethTrainer;
 
 class Program
 {

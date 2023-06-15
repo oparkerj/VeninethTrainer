@@ -1,4 +1,4 @@
-namespace VeninethTrainer.Avalonia;
+namespace VeninethTrainer;
 
 /// <summary>
 /// Enumeration for virtual keys.

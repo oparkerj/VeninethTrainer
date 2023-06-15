@@ -4,7 +4,7 @@ using System.Text;
 
 #pragma warning disable 1591
 
-namespace VeninethTrainer.Avalonia
+namespace VeninethTrainer
 {
     using SizeT = UIntPtr;
 

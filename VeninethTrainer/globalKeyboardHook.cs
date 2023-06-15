@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Avalonia.Input;
-using Avalonia.Win32.Input;
 
-namespace VeninethTrainer.Avalonia
+namespace VeninethTrainer
 {
 	/// <summary>
 	/// A class that manages a global low level keyboard hook

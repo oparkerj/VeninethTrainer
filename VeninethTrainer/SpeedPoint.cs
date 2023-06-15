@@ -1,4 +1,4 @@
-namespace VeninethTrainer.Avalonia
+namespace VeninethTrainer
 {
     public struct SpeedPoint
     {

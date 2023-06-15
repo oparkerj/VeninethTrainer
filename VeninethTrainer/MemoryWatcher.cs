@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+
 #pragma warning disable 1591
 
 // Note: Please be careful when modifying this because it could break existing components!
 
-namespace VeninethTrainer
+namespace VeninethTrainer.Avalonia
 {
     public class MemoryWatcherList : List<MemoryWatcher>
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using Avalonia.Input;
+using Avalonia.Win32.Input;
 
-namespace VeninethTrainer
+namespace VeninethTrainer.Avalonia
 {
 	/// <summary>
 	/// A class that manages a global low level keyboard hook
@@ -39,7 +39,7 @@ namespace VeninethTrainer
 		/// <summary>
 		/// The collections of keys to watch for
 		/// </summary>
-		public List<Keys> HookedKeys = new List<Keys>();
+		public List<Key> HookedKeys = new List<Key>();
 		/// <summary>
 		/// Handle to the hook, need this to unhook and call the next hook
 		/// </summary>
@@ -50,11 +50,11 @@ namespace VeninethTrainer
 		/// <summary>
 		/// Occurs when one of the hooked keys is pressed
 		/// </summary>
-		public event KeyEventHandler KeyDown;
+		public event Action<object, KeyEventArgs> KeyDown;
 		/// <summary>
 		/// Occurs when one of the hooked keys is released
 		/// </summary>
-		public event KeyEventHandler KeyUp;
+		public event Action<object, KeyEventArgs> KeyUp;
 		#endregion
 
 		#region Constructors and Destructors
@@ -106,10 +106,18 @@ namespace VeninethTrainer
 		{
 			if (code >= 0)
 			{
-				Keys key = (Keys)lParam.vkCode;
+				// var keyData = (lParam.scanCode << 16) | ((lParam.flags & 1) << 24);
+				// Key key = KeyInterop.KeyFromVirtualKey(lParam.vkCode, keyData);
+	
+				// Temporary fix until Avalonia 11 is released
+				if (!Enum.TryParse<Key>(((VirtualKeys) lParam.vkCode).ToString(), out var key))
+				{
+					goto Next;
+				}
+				
 				if (HookedKeys.Contains(key))
 				{
-					KeyEventArgs kea = new KeyEventArgs(key);
+					KeyEventArgs kea = new KeyEventArgs {Key = key};
 					if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && (KeyDown != null))
 					{
 						KeyDown(this, kea);
@@ -122,6 +130,8 @@ namespace VeninethTrainer
 						return 1;
 				}
 			}
+			
+			Next:
 			return CallNextHookEx(hhook, code, wParam, ref lParam);
 		}
 		#endregion
@@ -135,7 +145,7 @@ namespace VeninethTrainer
 		/// <param name="hInstance">The handle you want to attach the event to, can be null</param>
 		/// <param name="threadId">The thread you want to attach the event to, can be null</param>
 		/// <returns>a handle to the desired hook</returns>
-		[DllImport("user32.dll")]
+		[DllImport("User32.dll")]
 		static extern IntPtr SetWindowsHookEx(int idHook, keyboardHookProc callback, IntPtr hInstance, uint threadId);
 
 		/// <summary>
@@ -143,7 +153,7 @@ namespace VeninethTrainer
 		/// </summary>
 		/// <param name="hInstance">The hook handle that was returned from SetWindowsHookEx</param>
 		/// <returns>True if successful, false otherwise</returns>
-		[DllImport("user32.dll")]
+		[DllImport("User32.dll")]
 		static extern bool UnhookWindowsHookEx(IntPtr hInstance);
 
 		/// <summary>
@@ -154,7 +164,7 @@ namespace VeninethTrainer
 		/// <param name="wParam">The wparam.</param>
 		/// <param name="lParam">The lparam.</param>
 		/// <returns></returns>
-		[DllImport("user32.dll")]
+		[DllImport("User32.dll")]
 		static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref keyboardHookStruct lParam);
 
 		/// <summary>
@@ -162,7 +172,7 @@ namespace VeninethTrainer
 		/// </summary>
 		/// <param name="lpFileName">Name of the library</param>
 		/// <returns>A handle to the library</returns>
-		[DllImport("kernel32.dll")]
+		[DllImport("Kernel32.dll")]
 		static extern IntPtr LoadLibrary(string lpFileName);
 		#endregion
 	}

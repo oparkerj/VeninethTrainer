@@ -15,16 +15,16 @@ namespace VeninethTrainer;
 
 public partial class MainWindow : Window
 {
-    internal globalKeyboardHook kbHook = new globalKeyboardHook();
+    internal GlobalKeyListener kbHook = new();
     public DispatcherTimer updateTimer;
-    public Process game;
+    public Process? game;
     public bool hooked = false;
     //DeepPointer cheatManagerDP, capsuleDP, charMoveCompDP, playerControllerDP, playerCharacterDP, worldDP, gameModeDP, worldSettingsDP;
     
-    public DeepPointer sphereDP = new DeepPointer(0x02F6BA98, 0x0, 0xE8, 0x398, 0x0);
-    public DeepPointer gravityDP = new DeepPointer("PhysX3_x64.dll", 0x191434);
-    public DeepPointer characterControllerDP = new DeepPointer(0x02F6C030, 0x30, 0x0);
-    public DeepPointer worldSettingsDP = new DeepPointer(0x02F8AB60, 0x30, 0x240, 0x0);
+    public DeepPointer sphereDP = new(0x02F6BA98, 0x0, 0xE8, 0x398, 0x0);
+    public DeepPointer gravityDP = new("PhysX3_x64.dll", 0x191434);
+    public DeepPointer characterControllerDP = new(0x02F6C030, 0x30, 0x0);
+    public DeepPointer worldSettingsDP = new(0x02F8AB60, 0x30, 0x240, 0x0);
 
     public IntPtr xVelPtr, yVelPtr, zVelPtr, xPosPtr, yPosPtr, zPosPtr, gameSpeedPtr, gravityPtr, hLookPtr, vLookPtr;
     public byte[] gravityCode = new byte[5] { 0xF3, 0x0F, 0x11, 0x69, 0x08 };
@@ -37,7 +37,7 @@ public partial class MainWindow : Window
     // Variables used for the speed tracker
     private bool _speedTracker, _speedReady;
     private string? _speedDir;
-    private List<SpeedPoint> _speedPoints;
+    private List<SpeedPoint>? _speedPoints;
     private Stopwatch _speedWatch;
     private DispatcherTimer _speedTimer;
 
@@ -76,21 +76,24 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
-        kbHook.KeyDown += InputKeyDown;
-        kbHook.KeyUp += InputKeyUp;
-        kbHook.HookedKeys.Add(Key.W);
-        kbHook.HookedKeys.Add(Key.F1);
-        kbHook.HookedKeys.Add(Key.F4);
-        kbHook.HookedKeys.Add(Key.F5);
-        kbHook.HookedKeys.Add(Key.F6);
-        kbHook.HookedKeys.Add(Key.F7);
-        kbHook.HookedKeys.Add(Key.F8);
+        
+        AddKeyListener(Key.W);
+        AddKeyListener(Key.F1);
+        AddKeyListener(Key.F4);
+        AddKeyListener(Key.F5);
+        AddKeyListener(Key.F6);
+        AddKeyListener(Key.F7);
+        AddKeyListener(Key.F8);
 
         prefGameSpeed = 1.0f;
 
         updateTimer = new DispatcherTimer(TimeSpan.FromSeconds(1) / 60, DispatcherPriority.Normal, Update);
         updateTimer.Start();
+    }
+
+    private void AddKeyListener(Key key)
+    {
+        kbHook.HookedKeys[key] = down => down ? InputKeyDown(key) : InputKeyUp(key);
     }
 
     private void Update(object? sender, EventArgs e)
@@ -113,19 +116,19 @@ public partial class MainWindow : Window
             return;
         }
 
-        game.ReadValue<float>(xPosPtr, out xPos);
-        game.ReadValue<float>(yPosPtr, out yPos);
-        game.ReadValue<float>(zPosPtr, out zPos);
+        game.ReadValue(xPosPtr, out xPos);
+        game.ReadValue(yPosPtr, out yPos);
+        game.ReadValue(zPosPtr, out zPos);
 
-        game.ReadValue<float>(xVelPtr, out xVel);
-        game.ReadValue<float>(yVelPtr, out yVel);
-        game.ReadValue<float>(zVelPtr, out zVel);
-        double hVel = Math.Floor(Math.Sqrt(xVel * xVel + yVel * yVel) + 0.5f) / 100;
+        game.ReadValue(xVelPtr, out xVel);
+        game.ReadValue(yVelPtr, out yVel);
+        game.ReadValue(zVelPtr, out zVel);
+        var hVel = Math.Floor(Math.Sqrt(xVel * xVel + yVel * yVel) + 0.5f) / 100;
 
-        game.ReadValue<float>(vLookPtr, out vLook);
-        game.ReadValue<float>(hLookPtr, out hLook);
+        game.ReadValue(vLookPtr, out vLook);
+        game.ReadValue(hLookPtr, out hLook);
 
-        game.ReadValue<float>(gameSpeedPtr, out gameSpeed);
+        game.ReadValue(gameSpeedPtr, out gameSpeed);
 
         if (_speedTracker)
         {
@@ -178,26 +181,26 @@ public partial class MainWindow : Window
 
         if (noclip)
         {
-            double radian = (double)hLook * (Math.PI / 180);
-            Vector direction = new Vector(Math.Cos(radian), Math.Sin(radian));
+            var radian = hLook * (Math.PI / 180);
+            var direction = new Vector(Math.Cos(radian), Math.Sin(radian));
             Debug.WriteLine("{0}, {1}", forward, side);
-            Vector inputVector = new Vector((double)side, (double)forward);
+            var inputVector = new Vector(side, forward);
             if(inputVector.Length > 1)
                 inputVector.Normalize();
 
             Debug.WriteLine(inputVector);
-            float newXVel = (float)direction.X * (float)inputVector.Y * flySpeed * 100;
-            float newYVel = (float)direction.Y * (float)inputVector.Y * flySpeed * 100;
+            var newXVel = (float)direction.X * (float)inputVector.Y * flySpeed * 100;
+            var newYVel = (float)direction.Y * (float)inputVector.Y * flySpeed * 100;
 
             Debug.WriteLine("XVEL {0}, YVEL {1}", newXVel, newYVel);
 
 
-            radian = (double)vLook * (Math.PI / 180);
+            radian = vLook * (Math.PI / 180);
             direction = new Vector(Math.Cos(radian), Math.Sin(radian));
             Debug.WriteLine("up vector: " + direction);
-            float newZVel = (float)(direction.Y * forward * 10000);
+            var newZVel = (float)(direction.Y * forward * 10000);
             game.WriteBytes(zVelPtr, BitConverter.GetBytes(newZVel));
-            float nonUpMultiplier = 1f - Math.Abs((float)direction.Y);
+            var nonUpMultiplier = 1f - Math.Abs((float)direction.Y);
             game.WriteBytes(xVelPtr, BitConverter.GetBytes(newXVel*nonUpMultiplier));
             game.WriteBytes(yVelPtr, BitConverter.GetBytes(newYVel*nonUpMultiplier));
         }
@@ -205,7 +208,7 @@ public partial class MainWindow : Window
 
     private bool Hook()
     {
-        List<Process> processList = Process.GetProcesses().ToList().FindAll(x => x.ProcessName.Contains("Game-Win64-Shipping"));
+        var processList = Process.GetProcesses().ToList().FindAll(x => x.ProcessName.Contains("Game-Win64-Shipping"));
         if (processList.Count == 0)
         {
             game = null;
@@ -213,17 +216,12 @@ public partial class MainWindow : Window
         }
         game = processList[0];
 
-        if (game.HasExited)
-            return false;
-
-        return true;
+        return !game.HasExited;
     }
-
-
 
     private void DerefPointers()
     {
-        sphereDP.DerefOffsets(game, out IntPtr basePtr);
+        sphereDP.DerefOffsets(game, out var basePtr);
         xPosPtr = basePtr + 0xA0;
         yPosPtr = basePtr + 0xA4;
         zPosPtr = basePtr + 0xA8;
@@ -232,21 +230,19 @@ public partial class MainWindow : Window
         zVelPtr = basePtr + 0xD8;
         gravityDP.DerefOffsets(game, out gravityPtr);
 
-        characterControllerDP.DerefOffsets(game, out IntPtr characterControllerPtr);
+        characterControllerDP.DerefOffsets(game, out var characterControllerPtr);
         vLookPtr = characterControllerPtr + 0x2A8;
         hLookPtr = characterControllerPtr + 0x2AC;
 
-
-        worldSettingsDP.DerefOffsets(game, out IntPtr worldSettingsPtr);
+        worldSettingsDP.DerefOffsets(game, out var worldSettingsPtr);
         gameSpeedPtr = worldSettingsPtr + 0x308;
     }
 
     private bool WKeyHandled => noclip && !_speedTracker;
 
-    private void InputKeyDown(object sender, KeyEventArgs e)
+    private bool InputKeyDown(Key key)
     {
-        e.Handled = true;
-        switch (e.Key)
+        switch (key)
         {
             case Key.F1:
                 HandleActionButton();
@@ -268,13 +264,13 @@ public partial class MainWindow : Window
                 if (_speedTracker && noclip) ToggleNoclip();
                 break;
             case Key.W:
-                e.Handled = WKeyHandled;
                 forward = 1;
                 CheckTimer();
-                break;
+                return WKeyHandled;
             default:
-                break;
+                return false;
         }
+        return true;
     }
 
     private void CheckTimer()
@@ -286,14 +282,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task HandleActionButton()
+    private void HandleActionButton()
     {
         if (_speedTracker)
         {
             if (_speedDir == null)
             {
                 var dialog = new OpenFolderDialog();
-                _speedDir = await dialog.ShowAsync(this);
+                _speedDir = dialog.ShowAsync(this).Result;
             }
             else if (_speedPoints == null)
             {
@@ -350,7 +346,6 @@ public partial class MainWindow : Window
 
     }
 
-
     private void Teleport(bool velocity = false)
     {
         game.WriteBytes(xPosPtr, BitConverter.GetBytes(storedPos[0]));
@@ -372,11 +367,6 @@ public partial class MainWindow : Window
             game.WriteBytes(yVelPtr, BitConverter.GetBytes(0f));
             game.WriteBytes(zVelPtr, BitConverter.GetBytes(0f));
         }
-    }
-
-    private void ToggleSpeedTracker()
-    {
-        
     }
 
     private void SetLabel(bool state, Label label)
@@ -404,15 +394,13 @@ public partial class MainWindow : Window
         storedPos = new[] { xPos, yPos, zPos, vLook, hLook, xVel, yVel, zVel };
     }
 
-    private void InputKeyUp(object sender, KeyEventArgs e)
+    private bool InputKeyUp(Key key)
     {
-        e.Handled = true;
-        switch (e.Key)
+        switch (key)
         {
             case Key.W:
-                e.Handled = WKeyHandled;
                 forward = 0;
-                break;
+                return WKeyHandled;
             case Key.S:
                 forward = 0;
                 break;
@@ -422,7 +410,10 @@ public partial class MainWindow : Window
             case Key.D:
                 side = 0;
                 break;
+            default:
+                return false;
         }
+        return true;
     }
 
     private void ChangeGameSpeed()
@@ -451,6 +442,8 @@ public partial class MainWindow : Window
     {
         Debug.WriteLine("{0} want {1}", gameSpeed, prefGameSpeed);
         if ((gameSpeed == 1.0f || gameSpeed == 2.0f || gameSpeed == 4.0f || gameSpeed == 0.5f) && gameSpeed != prefGameSpeed)
+        {
             game.WriteBytes(gameSpeedPtr, BitConverter.GetBytes(prefGameSpeed));
+        }
     }
 }

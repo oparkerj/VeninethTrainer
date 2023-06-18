@@ -8,39 +8,38 @@
         Icon="Ghostrunner_101.ico"
         SizeToContent="WidthAndHeight"
         CanResize="False">
-	<Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,Auto" Background="#FF292929">
+	<Grid RowDefinitions="Auto,Auto" ColumnDefinitions="250,Auto" Background="#FF292929">
 		<StackPanel Grid.Row="0" Grid.Column="0" Spacing="10" Margin="10">
-			<Label x:Name="positionLabel" Content="Position" FontSize="20" FontWeight="Bold" Foreground="White"/>
+			<Label Content="Position" FontSize="20" FontWeight="Bold" Foreground="White"/>
 			<StackPanel Orientation="Horizontal" Spacing="15">
-				<TextBlock x:Name="positionLabelBlock" FontSize="20" TextAlignment="Left" DockPanel.Dock="Left">x&#x0a;y&#x0a;z</TextBlock>
-				<TextBlock x:Name="positionBlock" FontSize="20" TextAlignment="Right" DockPanel.Dock="Right">0&#x0a;0&#x0a;0</TextBlock>
+				<TextBlock FontSize="20" TextAlignment="Left" DockPanel.Dock="Left">x&#x0a;y&#x0a;z</TextBlock>
+				<TextBlock x:Name="PositionText" FontSize="20" TextAlignment="Right" DockPanel.Dock="Right">0&#x0a;0&#x0a;0</TextBlock>
 			</StackPanel>
 		</StackPanel>
 		
-		<StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="50" Margin="10" VerticalAlignment="Bottom">
-			<Label x:Name="speedLabel" Content="Speed" FontSize="20" FontWeight="Bold"/>
-			<TextBlock x:Name="speedBlock" Text="0.00 m/s" FontSize="20" TextAlignment="Right"/>
+		<StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="40" Margin="10" VerticalAlignment="Bottom">
+			<Label Content="Speed" FontSize="20" FontWeight="Bold"/>
+			<TextBlock x:Name="SpeedText" Text="0.00 m/s" FontSize="20" TextAlignment="Right"/>
 		</StackPanel>
 		
 		<StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="10" Spacing="3">
 			<DockPanel HorizontalAlignment="Stretch">
-				<Label x:Name="noclipLabel" Content="OFF" FontWeight="Bold" Foreground="Red" Margin="3" DockPanel.Dock="Right" VerticalAlignment="Center"/>
-				<Button x:Name="noclipBtn" Content="[F1] NoClip" HorizontalAlignment="Stretch" Click="noclipBtn_Click"/>
+				<Label x:Name="FlyToggleLabel" Content="OFF" FontWeight="Bold" Foreground="Red" Margin="3" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+				<Button Content="[F1] Fly Mode" HorizontalAlignment="Stretch" Click="OnFlyModeClicked"/>
 			</DockPanel>
 			
 			<Panel Height="10"/>
         
 			<DockPanel HorizontalAlignment="Stretch">
-				<Label x:Name="gameSpeedLabel" Content="1.0x" FontWeight="Bold" DockPanel.Dock="Right" VerticalAlignment="Center"/>
-				<Button x:Name="gameSpeedBtn" Content="[F4] Game Speed" HorizontalAlignment="Stretch" Click="gameSpeedBtn_Click"/>
+				<Label x:Name="GameSpeedLabel" Content="1.0x" FontWeight="Bold" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+				<Button Content="[F4] Game Speed" HorizontalAlignment="Stretch" Click="OnGameSpeedClicked"/>
 			</DockPanel>
 			
 			<Panel Height="10"/>
         
-			<Button x:Name="saveBtn" Content="[F5] Save Position" HorizontalAlignment="Stretch" Click="saveBtn_Click"/>
-			<Button x:Name="teleBtn" Content="[F6] Teleport" HorizontalAlignment="Stretch" Click="teleBtn_Click"/>
-			<Button x:Name="teleVelBtn" Content="[F7] Teleport With Velocity" HorizontalAlignment="Stretch" Click="teleVelBtn_Click"/>
-			<Label x:Name="speedTrackLabel" Content="[F8] Speed Tracker"/>
+			<Button Content="[F5] Save Position" HorizontalAlignment="Stretch" Click="OnSavePositionClicked"/>
+			<Button Content="[F6] Teleport" HorizontalAlignment="Stretch" Click="OnTeleportClicked"/>
+			<Button Content="[F7] Teleport With Velocity" HorizontalAlignment="Stretch" Click="OnTeleportVelocityClicked"/>
 		</StackPanel>
 	</Grid>
 </Window>

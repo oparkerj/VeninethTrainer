@@ -95,12 +95,12 @@ public class DeepPointer
         return DerefString(process, ReadStringType.AutoDetect, numBytes, out str);
     }
 
-    public bool DerefString(Process process, ReadStringType type, int numBytes, out string? str)
+    public bool DerefString(Process process, ReadStringType type, int numBytes, out string str)
     {
         var sb = new StringBuilder(numBytes);
         if (!DerefString(process, type, sb))
         {
-            str = null;
+            str = string.Empty;
             return false;
         }
         str = sb.ToString();
@@ -155,50 +155,52 @@ public class DeepPointer
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Vector3f
+public readonly struct Vector2F
 {
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
+    public readonly float X;
+    public readonly float Y;
 
-    public int IX => (int) X;
-    public int IY => (int) Y;
-    public int IZ => (int) Z;
+    public Vector2F(float x, float y)
+    {
+        X = x;
+        Y = y;
+    }
 
-    public Vector3f(float x, float y, float z) : this()
+    public void Deconstruct(out float x, out float y)
+    {
+        x = X;
+        y = Y;
+    }
+
+    public override string ToString()
+    {
+        return $"{X}, {Y}";
+    }
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly struct Vector3F
+{
+    public readonly float X;
+    public readonly float Y;
+    public readonly float Z;
+
+    public Vector3F(float x, float y, float z)
     {
         X = x;
         Y = y;
         Z = z;
     }
 
-    public float Distance(Vector3f other)
+    public void Deconstruct(out float x, out float y, out float z)
     {
-        var result = (X - other.X) * (X - other.X) +
-                     (Y - other.Y) * (Y - other.Y) +
-                     (Z - other.Z) * (Z - other.Z);
-        return (float) Math.Sqrt(result);
-    }
-
-    public float DistanceXY(Vector3f other)
-    {
-        var result = (X - other.X) * (X - other.X) +
-                     (Y - other.Y) * (Y - other.Y);
-        return (float) Math.Sqrt(result);
-    }
-
-    public bool BitEquals(Vector3f other)
-    {
-        return X.BitEquals(other.X) && Y.BitEquals(other.Y) && Z.BitEquals(other.Z);
-    }
-
-    public bool BitEqualsXY(Vector3f other)
-    {
-        return X.BitEquals(other.X) && Y.BitEquals(other.Y);
+        x = X;
+        y = Y;
+        z = Z;
     }
 
     public override string ToString()
     {
-        return $"{X} {Y} {Z}";
+        return $"{X}, {Y}, {Z}";
     }
 }

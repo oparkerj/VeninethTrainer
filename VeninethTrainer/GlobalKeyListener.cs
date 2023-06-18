@@ -101,6 +101,16 @@ public class GlobalKeyListener
 		UnhookWindowsHookEx(_hook);
 	}
 
+	public void SetDownHandler(Key key, Action action)
+	{
+		HookedKeys[key] = down =>
+		{
+			if (!down) return false;
+			action();
+			return true;
+		};
+	}
+
 	/// <summary>
 	/// The callback for the keyboard hook
 	/// </summary>

@@ -319,7 +319,7 @@ public static class ProcessExtensions
         return process.WriteBytes(addr, arr);
     }
 
-    public static bool WriteBytes(this Process process, IntPtr addr, byte[] bytes)
+    public static bool WriteBytes(this Process process, IntPtr addr, params byte[] bytes)
     {
         var length = (nuint) bytes.Length;
         var readData = WinApi.WriteProcessMemory(process.Handle, addr, bytes, length, out var written);

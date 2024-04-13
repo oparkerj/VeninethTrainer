@@ -11,21 +11,18 @@ namespace VeninethTrainer;
 
 public class DeepPointer
 {
-    private string _module;
-    private IntPtr _base;
-    private bool _absolute;
+    private readonly string _module;
+    private readonly IntPtr _base;
+    private readonly bool _absolute;
 
-    private List<int> _offsets;
+    private readonly List<int> _offsets;
 
     private DeepPointer(string module, IntPtr @base, bool absolute, int[] offsets)
     {
+        _module = module;
         _base = @base;
         _absolute = absolute;
-        
-        _offsets = new List<int> {0};
-        _offsets.AddRange(offsets);
-
-        _module = module;
+        _offsets = [0, ..offsets];
     }
 
     public DeepPointer(IntPtr @base, params int[] offsets)
@@ -50,44 +47,29 @@ public class DeepPointer
     public bool Deref<T>(Process process, out T value)
         where T : struct
     {
-        if (DerefOffsets(process, out var ptr) && process.ReadValue(ptr, out value)) return true;
         value = default;
-        return false;
+        return DerefOffsets(process, out var ptr) && process.ReadValue(ptr, out value);
     }
 
     public byte[]? DerefBytes(Process process, int count)
     {
-        if (!DerefBytes(process, count, out var bytes))
-        {
-            bytes = null;
-        }
-        return bytes;
+        return DerefBytes(process, count, out var bytes) ? bytes : null;
     }
 
     public bool DerefBytes(Process process, int count, out byte[]? value)
     {
-        IntPtr ptr;
-        if (DerefOffsets(process, out ptr) && process.ReadBytes(ptr, count, out value)) return true;
         value = null;
-        return false;
+        return DerefOffsets(process, out var ptr) && process.ReadBytes(ptr, count, out value);
     }
 
     public string? DerefString(Process process, int numBytes, string? @default = null)
     {
-        if (!DerefString(process, ReadStringType.AutoDetect, numBytes, out var str))
-        {
-            str = @default;
-        }
-        return str;
+        return DerefString(process, ReadStringType.AutoDetect, numBytes, out var str) ? str : @default;
     }
 
     public string? DerefString(Process process, ReadStringType type, int numBytes, string? @default = null)
     {
-        if (!DerefString(process, type, numBytes, out var str))
-        {
-            str = @default;
-        }
-        return str;
+        return DerefString(process, type, numBytes, out var str) ? str : @default;
     }
 
     public bool DerefString(Process process, int numBytes, out string str)

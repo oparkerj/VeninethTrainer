@@ -12,8 +12,8 @@
 		<StackPanel Grid.Row="0" Grid.Column="0" Spacing="10" Margin="10">
 			<Label Content="Position" FontSize="20" FontWeight="Bold" Foreground="White"/>
 			<StackPanel Orientation="Horizontal" Spacing="15">
-				<TextBlock FontSize="20" TextAlignment="Left" DockPanel.Dock="Left">x&#x0a;y&#x0a;z</TextBlock>
-				<TextBlock x:Name="PositionText" FontSize="20" TextAlignment="Right" DockPanel.Dock="Right">0&#x0a;0&#x0a;0</TextBlock>
+				<TextBlock FontSize="20" TextAlignment="Left" DockPanel.Dock="Left">x<LineBreak/>y<LineBreak/>z</TextBlock>
+				<TextBlock x:Name="PositionText" FontSize="20" TextAlignment="Right" DockPanel.Dock="Right">0<LineBreak/>0<LineBreak/>0</TextBlock>
 			</StackPanel>
 		</StackPanel>
 		

@@ -18,6 +18,9 @@ public partial class MainWindow : Window
 
     private readonly SingleUseValue<float> _gameSpeed = new();
 
+    private readonly TimeSpan _highTickRate = TimeSpan.FromSeconds(1) / 60;
+    private readonly TimeSpan _lowTickRate = TimeSpan.FromSeconds(0.5);
+
     private double _forward;
     private Vector3F _storedPosition;
     private Vector3F _storedVelocity;
@@ -34,8 +37,14 @@ public partial class MainWindow : Window
         _keyListener.SetDownHandler(Key.F6, TeleportOnly);
         _keyListener.SetDownHandler(Key.F7, TeleportWithVelocity);
 
-        _updateTimer = new DispatcherTimer(TimeSpan.FromSeconds(1) / 60, DispatcherPriority.Normal, Update);
+        _updateTimer = new DispatcherTimer(_lowTickRate, DispatcherPriority.Normal, Update);
         _updateTimer.Start();
+    }
+
+    private void SetTickRate(TimeSpan interval)
+    {
+        if (_updateTimer.Interval == interval) return;
+        _updateTimer.Interval = interval;
     }
 
     private void Update(object? sender, EventArgs e)
@@ -43,8 +52,11 @@ public partial class MainWindow : Window
         if (!_game.UpdateHookStatus())
         {
             // Game not hooked
+            SetTickRate(_lowTickRate);
             return;
         }
+
+        SetTickRate(_highTickRate);
         
         if (_gameSpeed.TryGet(out var gameSpeed))
         {

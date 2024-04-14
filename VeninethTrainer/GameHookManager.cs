@@ -60,13 +60,15 @@ public class GameHookManager
         set => _game?.WriteValue(_gameSpeedPointer, value);
     }
 
-    private void SetupGamePointers()
+    private bool SetupGamePointers()
     {
-        InitPointer(_playerOffsets, 0xA0, out _positionPointer);
-        InitPointer(_playerOffsets, 0xD0, out _velocityPointer);
-        InitPointer(_gravityOffsets, 0, out _gravityPointer);
-        InitPointer(_playerControllerOffsets, 0x2A8, out _viewPointer);
-        InitPointer(_worldSettingsOffsets, 0x308, out _gameSpeedPointer);
+        var success = true;
+        success &= InitPointer(_playerOffsets, 0xA0, out _positionPointer);
+        success &= InitPointer(_playerOffsets, 0xD0, out _velocityPointer);
+        success &= InitPointer(_gravityOffsets, 0, out _gravityPointer);
+        success &= InitPointer(_playerControllerOffsets, 0x2A8, out _viewPointer);
+        success &= InitPointer(_worldSettingsOffsets, 0x308, out _gameSpeedPointer);
+        return success;
     }
 
     private void Reset()
@@ -80,16 +82,25 @@ public class GameHookManager
         _fly = false;
     }
     
-    private void InitPointer(DeepPointer pointer, int offset, out IntPtr address)
+    private bool InitPointer(DeepPointer pointer, int offset, out IntPtr address)
     {
         if (_game == null)
         {
             address = IntPtr.Zero;
-            return;
+            return false;
         }
-        
-        pointer.DerefOffsets(_game, out var result);
-        address = result + offset;
+
+        try
+        {
+            pointer.DerefOffsets(_game, out var result);
+            address = result + offset;
+            return true;
+        }
+        catch (Exception)
+        {
+            address = IntPtr.Zero;
+            return false;
+        }
     }
 
     private bool TryHook()
@@ -115,7 +126,6 @@ public class GameHookManager
     {
         if (!Hooked && !TryHook()) return false;
 
-        SetupGamePointers();
-        return true;
+        return SetupGamePointers();
     }
 }

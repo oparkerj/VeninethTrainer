@@ -63,6 +63,45 @@ public class GameHookManager
         set => _game?.WriteValue(_gameSpeedPointer, value);
     }
 
+    private string TranslateName(string gameName)
+    {
+        return gameName switch
+        {
+            "Level00" => "Aita",
+            "Level01" => "Orakh",
+            "Level02" => "Init",
+            "Level03" => "Opak",
+            "Level04" => "Vikaros",
+            "Level05" => "Tulan",
+            "Level06" => "Hecto",
+            "Level07" => "Ion",
+            "Level08" => "Varr",
+            "Level09" => "Ama",
+            "Level10" => "Takot",
+            "Trials/Vorbit00" => "Init Orbital",
+            "Trials/Vorbit01" => "Opak Orbital (Right)",
+            "Trials/Vorbit02" => "Opak Orbital (Left)",
+            "Trials/Vring01" => "Tulan Orbital (Left)",
+            "Trials/Vring02" => "Tulan Orbital (Right)",
+            "Trials/Volt01" => "Hecto Orbital (Right)",
+            "Trials/Volt02" => "Hecto Orbital (Left)",
+            "Trials/Volt03" => "Hecto Orbital (Back)",
+            "Trials/Volt04" => "Hecto Orbital (Front)",
+            "Trials/Vrain01" => "Ion Orbital (Left)",
+            "Trials/Vrain02" => "Ion Orbital (Right)",
+            "ApexOutro" => "Venineth",
+            "SecretLevel0X" => "Secret Ending",
+            "SecretLevel0X_Outro" => "Secret Ending Outro",
+            "SecretLevel01" => "Trinoid G",
+            "SecretLevel02" => "Trinoid Y",
+            "SecretLevel03" => "Trinoid B",
+            "SecretLevel04" => "Trinoid S",
+            "SecretLevel05" => "Trinoid R",
+            "SecretLevel06" => "Trinoid V",
+            _ => gameName
+        };
+    }
+
     private readonly StringBuilder _nameBuffer = new(255);
     public string Map
     {
@@ -70,7 +109,7 @@ public class GameHookManager
         {
             _nameBuffer.Length = 0;
             if (_game?.ReadString(_mapNamePointer, _nameBuffer) != true) return string.Empty;
-            return _nameBuffer.Replace("/Game/Maps/", "").Replace("Secrets/", "").ToString();
+            return TranslateName(_nameBuffer.Replace("/Game/Maps/", "").Replace("Secrets/", "").ToString());
         }
     }
 

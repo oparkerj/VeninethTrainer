@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace VeninethTrainer;
 
@@ -15,12 +16,14 @@ public class GameHookManager
     private readonly DeepPointer _gravityOffsets = new("PhysX3_x64.dll", 0x191434);
     private readonly DeepPointer _playerControllerOffsets = new(0x02F6C030, 0x30, 0x0);
     private readonly DeepPointer _worldSettingsOffsets = new(0x02F8AB60, 0x30, 0x240, 0x0);
+    private readonly DeepPointer _mapNameOffsets = new(0x02F8AB60, 0x3F8, 0x0);
     
     private IntPtr _positionPointer;
     private IntPtr _velocityPointer;
     private IntPtr _gravityPointer;
     private IntPtr _viewPointer;
     private IntPtr _gameSpeedPointer;
+    private IntPtr _mapNamePointer;
 
     public bool Hooked => _game?.HasExited == false;
     
@@ -60,6 +63,17 @@ public class GameHookManager
         set => _game?.WriteValue(_gameSpeedPointer, value);
     }
 
+    private readonly StringBuilder _nameBuffer = new(255);
+    public string Map
+    {
+        get
+        {
+            _nameBuffer.Length = 0;
+            if (_game?.ReadString(_mapNamePointer, _nameBuffer) != true) return string.Empty;
+            return _nameBuffer.Replace("/Game/Maps/", "").Replace("Secrets/", "").ToString();
+        }
+    }
+
     private bool SetupGamePointers()
     {
         var success = true;
@@ -68,6 +82,7 @@ public class GameHookManager
         success &= InitPointer(_gravityOffsets, 0, out _gravityPointer);
         success &= InitPointer(_playerControllerOffsets, 0x2A8, out _viewPointer);
         success &= InitPointer(_worldSettingsOffsets, 0x308, out _gameSpeedPointer);
+        success &= InitPointer(_mapNameOffsets, 0, out _mapNamePointer);
         return success;
     }
 

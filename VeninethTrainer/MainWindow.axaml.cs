@@ -91,6 +91,9 @@ public partial class MainWindow : Window
         }
         ToggleLabel(_game.Fly, FlyToggleLabel);
 
+        MapText.Text = _game.Map;
+        return;
+
         Vector UnitVector(double radians) => new(Math.Cos(radians), Math.Sin(radians));
         string FormatUnits(float value) => $"{value / 100f:0.00}";
     }

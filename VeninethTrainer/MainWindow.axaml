@@ -17,10 +17,13 @@
 			</StackPanel>
 		</StackPanel>
 		
-		<StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="40" Margin="10" VerticalAlignment="Bottom">
-			<Label Content="Speed" FontSize="20" FontWeight="Bold"/>
-			<TextBlock x:Name="SpeedText" Text="0.00 m/s" FontSize="20" TextAlignment="Right"/>
-		</StackPanel>
+		<Grid Grid.Row="1" Grid.Column="0" RowDefinitions="*,*" ColumnDefinitions="*,*" Margin="10">
+			<Label Grid.Row="0" Grid.Column="0" Content="Speed" FontSize="20" FontWeight="Bold"/>
+			<TextBlock Grid.Row="0" Grid.Column="1" x:Name="SpeedText" Text="0.00 m/s" FontSize="20"/>
+			
+			<Label Grid.Row="1" Grid.Column="0" Content="Map" FontSize="20" FontWeight="Bold"/>
+			<TextBlock Grid.Row="1" Grid.Column="1" x:Name="MapText" Text="" FontSize="20"/>
+		</Grid>
 		
 		<StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="10" Spacing="3">
 			<DockPanel HorizontalAlignment="Stretch">

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -22,9 +23,7 @@ public partial class MainWindow : Window
     private readonly TimeSpan _lowTickRate = TimeSpan.FromSeconds(0.5);
 
     private double _forward;
-    private Vector3F _storedPosition;
-    private Vector3F _storedVelocity;
-    private Vector2F _storedView;
+    private readonly Dictionary<string, TeleportInfo> _teleports = new();
 
     public MainWindow()
     {
@@ -123,16 +122,19 @@ public partial class MainWindow : Window
 
     private void SavePosition()
     {
-        _storedPosition = _game.Position;
-        _storedVelocity = _game.Velocity;
-        _storedView = _game.Camera;
+        var map = _game.Map;
+        if (map.Length == 0) return;
+        _teleports[map] = new TeleportInfo(_game.Position, _game.Velocity, _game.Camera);
     }
 
     private void Teleport(bool withVelocity = false)
     {
-        _game.Position = _storedPosition;
-        _game.Velocity = withVelocity ? _storedVelocity : default;
-        _game.Camera = _storedView;
+        var map = _game.Map;
+        if (!_teleports.TryGetValue(map, out var teleport)) return;
+        
+        _game.Position = teleport.Position;
+        _game.Velocity = withVelocity ? teleport.Velocity : default;
+        _game.Camera = teleport.View;
     }
 
     private void TeleportOnly() => Teleport();

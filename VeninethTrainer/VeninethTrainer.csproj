@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <ApplicationIcon>Ghostrunner_101.ico</ApplicationIcon>
+        <ApplicationIcon>resources/game_logo_bg.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,6 +27,6 @@
     </ItemGroup>
     
     <ItemGroup>
-        <AvaloniaResource Include="Ghostrunner_101.ico" />
+        <AvaloniaResource Include="resources/game_logo_bg.ico" />
     </ItemGroup>
 </Project>

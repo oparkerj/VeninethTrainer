@@ -5,7 +5,7 @@
         mc:Ignorable="d"
         x:Class="VeninethTrainer.MainWindow"
         Title="Venineth Trainer"
-        Icon="Ghostrunner_101.ico"
+        Icon="resources/game_logo_bg.ico"
         SizeToContent="WidthAndHeight"
         CanResize="False">
 	<Grid RowDefinitions="Auto,Auto" ColumnDefinitions="250,Auto" Background="#FF292929">

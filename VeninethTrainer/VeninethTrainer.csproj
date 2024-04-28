@@ -29,4 +29,11 @@
     <ItemGroup>
         <AvaloniaResource Include="resources/game_logo_bg.ico" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="discord_game_sdk.dll">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

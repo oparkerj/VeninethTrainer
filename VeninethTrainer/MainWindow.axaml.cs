@@ -15,14 +15,17 @@ public partial class MainWindow : Window
     
     private readonly GlobalKeyListener _keyListener = new();
     private readonly GameHookManager _game = new();
+    private readonly DiscordManager _discordManager;
     private readonly DispatcherTimer _updateTimer;
+    private readonly DispatcherTimer _discordTimer;
 
     private readonly SingleUseValue<float> _gameSpeed = new();
 
     private readonly TimeSpan _highTickRate = TimeSpan.FromSeconds(1) / 60;
     private readonly TimeSpan _lowTickRate = TimeSpan.FromSeconds(0.5);
 
-    private double _forward;
+    private bool _flyForward;
+    private float? _zHold;
     private readonly Dictionary<string, TeleportInfo> _teleports = new();
 
     public MainWindow()
@@ -36,8 +39,12 @@ public partial class MainWindow : Window
         _keyListener.SetDownHandler(Key.F6, TeleportOnly);
         _keyListener.SetDownHandler(Key.F7, TeleportWithVelocity);
 
+        _discordManager = new DiscordManager();
+
         _updateTimer = new DispatcherTimer(_lowTickRate, DispatcherPriority.Normal, Update);
         _updateTimer.Start();
+        _discordTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Normal, (_, _) => _discordManager.TryConnect());
+        _discordTimer.Start();
     }
 
     private bool SetTickRate(TimeSpan interval)
@@ -53,12 +60,20 @@ public partial class MainWindow : Window
         {
             // Game not hooked
             SetTickRate(_lowTickRate);
+            _discordManager.SetMap(string.Empty);
+            _discordManager.Update();
             return;
         }
 
         if (SetTickRate(_highTickRate))
         {
             GameSpeedLabel.Content = $"{_game.GameSpeed:0.0}x";
+        }
+        
+        MapText.Text = _game.Map;
+        if (_discordManager.SetMap(MapText.Text))
+        {
+            _zHold = null;
         }
         
         if (_gameSpeed.TryGet(out var gameSpeed))
@@ -77,38 +92,48 @@ public partial class MainWindow : Window
 
         if (_game.Fly)
         {
-            var (v, h) = _game.Camera;
-            var angles = new Vector(h, v) * (Math.PI / 180d);
+            if (_flyForward)
+            {
+                var (v, h) = _game.Camera;
+                var angles = new Vector(h, v) * (Math.PI / 180d);
             
-            var verticalVelocity = UnitVector(angles.Y);
-            var nonUpMultiplier = 1f - Math.Abs(verticalVelocity.Y);
-            verticalVelocity *= _forward * 10000;
-            var zVelocity = (float) verticalVelocity.Y;
+                var verticalVelocity = UnitVector(angles.Y);
+                var nonUpMultiplier = 1f - Math.Abs(verticalVelocity.Y);
+                verticalVelocity *= 10000;
+                var zVelocity = (float) verticalVelocity.Y;
 
-            var newHorizontal = UnitVector(angles.X) * (_forward * FlySpeed * 100 * nonUpMultiplier);
-            var xVelocity = (float) newHorizontal.X;
-            var yVelocity = (float) newHorizontal.Y;
+                var newHorizontal = UnitVector(angles.X) * (FlySpeed * 100 * nonUpMultiplier);
+                var xVelocity = (float) newHorizontal.X;
+                var yVelocity = (float) newHorizontal.Y;
             
-            _game.Velocity = new Vector3F(xVelocity, yVelocity, zVelocity);
+                _game.Velocity = new Vector3F(xVelocity, yVelocity, zVelocity);
+            }
+            else
+            {
+                _zHold ??= z;
+                _game.Velocity = default;
+                _game.Position = new Vector3F(x, y, _zHold.Value);
+            }
         }
         ToggleLabel(_game.Fly, FlyToggleLabel);
-
-        MapText.Text = _game.Map;
+        
+        _discordManager.Update();
         return;
 
         Vector UnitVector(double radians) => new(Math.Cos(radians), Math.Sin(radians));
         string FormatUnits(float value) => $"{value / 100f:0.00}";
-        
     }
     
     private bool OnWKey(bool down)
     {
-        _forward = down ? 1d : 0d;
+        _flyForward = down;
+        _zHold = null;
         return _game.Fly;
     }
 
     private void ToggleFly()
     {
+        _zHold = null;
         _game.Fly = !_game.Fly;
     }
 

@@ -3,27 +3,32 @@ using System;
 namespace VeninethTrainer;
 
 public class SingleUseValue<T>
-    where T : notnull
 {
-    private T? _current;
+    private T _current = default!;
+    private bool _hasValue;
 
-    public void Set(T value) => _current = value;
+    public void Set(T value)
+    {
+        _current = value;
+        _hasValue = true;
+    }
 
     public bool TrySet(T value)
     {
-        if (_current is not null) return false;
-        _current = value;
+        if (_hasValue) return false;
+        Set(value);
         return true;
     }
     
     public bool TryGet(out T value)
     {
-        if (_current is null)
+        if (_hasValue)
         {
-            value = default!;
-            return false;
+            value = _current;
+            _hasValue = false;
+            return true;
         }
-        value = _current;
-        return true;
+        value = default!;
+        return false;
     }
 }

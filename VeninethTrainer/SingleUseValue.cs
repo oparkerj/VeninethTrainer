@@ -5,57 +5,25 @@ namespace VeninethTrainer;
 public class SingleUseValue<T>
     where T : notnull
 {
-    private T _current = default!;
-    public bool HasValue { get; private set; }
-    public bool WasRead { get; private set; }
+    private T? _current;
 
-    public T Value
+    public void Set(T value) => _current = value;
+
+    public bool TrySet(T value)
     {
-        get
-        {
-            WasRead = true;
-            return _current;
-        }
-        set
-        {
-            _current = value;
-            HasValue = true;
-            WasRead = false;
-        }
+        if (_current is not null) return false;
+        _current = value;
+        return true;
     }
-
+    
     public bool TryGet(out T value)
     {
-        if (!HasValue)
+        if (_current is null)
         {
             value = default!;
             return false;
         }
         value = _current;
-        HasValue = false;
-        WasRead = true;
         return true;
-    }
-
-    public bool TrySet(T value)
-    {
-        if (HasValue) return false;
-        Value = value;
-        return true;
-    }
-
-    public bool TrySetNew(T value)
-    {
-        if (WasRead) return false;
-        Value = value;
-        return true;
-    }
-
-    public void SetDefaultValue(Func<T> getter)
-    {
-        if (!WasRead)
-        {
-            _current = getter();
-        }
     }
 }

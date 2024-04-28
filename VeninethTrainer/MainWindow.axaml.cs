@@ -40,10 +40,11 @@ public partial class MainWindow : Window
         _updateTimer.Start();
     }
 
-    private void SetTickRate(TimeSpan interval)
+    private bool SetTickRate(TimeSpan interval)
     {
-        if (_updateTimer.Interval == interval) return;
+        if (_updateTimer.Interval == interval) return false;
         _updateTimer.Interval = interval;
+        return true;
     }
 
     private void Update(object? sender, EventArgs e)
@@ -55,14 +56,16 @@ public partial class MainWindow : Window
             return;
         }
 
-        SetTickRate(_highTickRate);
+        if (SetTickRate(_highTickRate))
+        {
+            GameSpeedLabel.Content = $"{_game.GameSpeed:0.0}x";
+        }
         
         if (_gameSpeed.TryGet(out var gameSpeed))
         {
             _game.GameSpeed = gameSpeed;
+            GameSpeedLabel.Content = $"{gameSpeed:0.0}x";
         }
-        _gameSpeed.SetDefaultValue(() => _game.GameSpeed);
-        GameSpeedLabel.Content = $"{_gameSpeed.Value:0.0}x";
 
         var newLine = Environment.NewLine;
         var (x, y, z) = _game.Position;
@@ -95,6 +98,7 @@ public partial class MainWindow : Window
 
         Vector UnitVector(double radians) => new(Math.Cos(radians), Math.Sin(radians));
         string FormatUnits(float value) => $"{value / 100f:0.00}";
+        
     }
     
     private bool OnWKey(bool down)
@@ -110,7 +114,7 @@ public partial class MainWindow : Window
 
     private void ChangeGameSpeed()
     {
-        _gameSpeed.Value = _gameSpeed.Value switch
+        var newSpeed = _game.GameSpeed switch
         {
             < 1f => 1f,
             < 1.5f => 2f,
@@ -118,6 +122,7 @@ public partial class MainWindow : Window
             > 3f => 0.5f,
             _ => 1f,
         };
+        _gameSpeed.Set(newSpeed);
     }
 
     private void SavePosition()

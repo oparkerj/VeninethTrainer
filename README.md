@@ -7,3 +7,4 @@ Changes in this fork:
 * Change from WPF to Avalonia UI
 * Add "Teleport with Velocity" button which will also restore the velocity at your saved position
 * Teleports are saved per-world
+* Discord Activity integration

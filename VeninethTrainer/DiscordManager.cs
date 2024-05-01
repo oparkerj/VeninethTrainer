@@ -10,16 +10,23 @@ public class DiscordManager
     
     // Make this readonly once ClearActivity is fixed
     private Discord? _discord;
-
-    private string? _mapName;
-    private Activity? _activity;
     
+    private Activity _activity;
+    private bool _updated;
+
+    private long _startTime;
+    private string? _mapName;
+    private GameHookManager.BallType _ballType = GameHookManager.BallType.Unknown;
+
     public void TryConnect()
     {
         try
         {
+            if (_discord is null)
+            {
+                _updated = true;
+            }
             _discord ??= new Discord(ClientId, (ulong) CreateFlags.NoRequireDiscord);
-            _discord.GetActivityManager().UpdateActivity(_activity.GetValueOrDefault(), _ => { });
         }
         catch
         {
@@ -37,6 +44,7 @@ public class DiscordManager
     {
         try
         {
+            UpdateActivity();
             _discord?.RunCallbacks();
         }
         catch (Exception)
@@ -45,39 +53,59 @@ public class DiscordManager
         }
     }
 
-    public bool SetMap(string name)
+    private void UpdateActivity()
     {
-        if (name == _mapName) return false;
-        _mapName = name;
+        if (!_updated) return;
+        _updated = false;
 
-        if (name == string.Empty)
+        if (string.IsNullOrEmpty(_mapName))
         {
-            _activity = null;
-            _discord?.GetActivityManager().UpdateActivity(default, _ => { });
-            return true;
+            _activity = default;
+            _discord?.GetActivityManager().UpdateActivity(_activity, _ => { });
+            return;
         }
-
-        var assetName = name.Replace(' ', '_')
+        
+        var assetName = _mapName.Replace(' ', '_')
             .Replace("(", "")
             .Replace(")", "")
             .ToLower();
 
+        var (ballName, ballAsset) = GameHookManager.GetBallInfo(_ballType);
+        
         _activity = new Activity
         {
             Type = ActivityType.Playing,
-            Details = name,
+            Details = _mapName,
             Assets = new ActivityAssets
             {
                 LargeImage = assetName,
-                LargeText = name
+                LargeText = _mapName,
+                SmallImage = ballAsset,
+                SmallText = ballName
             },
             Timestamps = new ActivityTimestamps
             {
-                Start = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                Start = _startTime
             }
         };
-        _discord?.GetActivityManager().UpdateActivity(_activity.Value, _ => { });
+        
+        _discord?.GetActivityManager().UpdateActivity(_activity, _ => { });
+    }
+
+    public bool SetMap(string name)
+    {
+        if (name == _mapName) return false;
+        _mapName = name;
+        _startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        _updated = true;
         return true;
+    }
+
+    public void SetBallType(GameHookManager.BallType type)
+    {
+        if (type == _ballType) return;
+        _ballType = type;
+        _updated = true;
     }
 
     ~DiscordManager()

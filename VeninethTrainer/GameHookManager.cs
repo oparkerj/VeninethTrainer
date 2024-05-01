@@ -17,6 +17,7 @@ public class GameHookManager
     private readonly DeepPointer _playerControllerOffsets = new(0x02F6C030, 0x30, 0x0);
     private readonly DeepPointer _worldSettingsOffsets = new(0x02F8AB60, 0x30, 0x240, 0x0);
     private readonly DeepPointer _mapNameOffsets = new(0x02F8AB60, 0x3F8, 0x0);
+    private readonly DeepPointer _playerPawnOffsets = new(0x2F8AB60, 0x170, 0x38, 0x0, 0x30, 0x270, 0x0);
     
     private IntPtr _positionPointer;
     private IntPtr _velocityPointer;
@@ -24,6 +25,7 @@ public class GameHookManager
     private IntPtr _viewPointer;
     private IntPtr _gameSpeedPointer;
     private IntPtr _mapNamePointer;
+    private IntPtr _ballTypePointer;
 
     public bool Hooked => _game?.HasExited == false;
     
@@ -63,6 +65,19 @@ public class GameHookManager
         set => _game?.WriteValue(_gameSpeedPointer, value);
     }
 
+    private readonly StringBuilder _nameBuffer = new(255);
+    public string Map
+    {
+        get
+        {
+            _nameBuffer.Length = 0;
+            if (_game?.ReadString(_mapNamePointer, _nameBuffer) != true) return string.Empty;
+            return TranslateName(_nameBuffer.Replace("/Game/Maps/", "").Replace("Secrets/", "").ToString());
+        }
+    }
+
+    public BallType CurrentBallType => _game?.ReadValue<BallType>(_ballTypePointer, out var type) == true ? type : BallType.Unknown;
+    
     private string TranslateName(string gameName)
     {
         return gameName switch
@@ -101,16 +116,32 @@ public class GameHookManager
             _ => gameName
         };
     }
-
-    private readonly StringBuilder _nameBuffer = new(255);
-    public string Map
+    
+    public enum BallType : byte
     {
-        get
+        Unknown = 0,
+        Core = 1,
+        Fire = 2,
+        Green = 3,
+        Red = 4,
+        Mirror = 5,
+        Ice = 6,
+        Void = 7,
+    }
+
+    public static (string? Name, string? Asset) GetBallInfo(BallType type)
+    {
+        return type switch
         {
-            _nameBuffer.Length = 0;
-            if (_game?.ReadString(_mapNamePointer, _nameBuffer) != true) return string.Empty;
-            return TranslateName(_nameBuffer.Replace("/Game/Maps/", "").Replace("Secrets/", "").ToString());
-        }
+            BallType.Core => ("Metal Ball", "metal_ball"),
+            BallType.Fire => ("Fire Ball", "fire_ball"),
+            BallType.Green => ("Green Ball (+)", "green_ball"),
+            BallType.Red => ("Red Ball (-)", "red_ball"),
+            BallType.Mirror => ("Mirror Ball", "mirror_ball"),
+            BallType.Ice => ("Ice Ball", "ice_ball"),
+            BallType.Void => ("Void Ball", "void_ball"),
+            _ => (null, null)
+        };
     }
 
     private bool SetupGamePointers()
@@ -122,6 +153,7 @@ public class GameHookManager
         success &= InitPointer(_playerControllerOffsets, 0x2A8, out _viewPointer);
         success &= InitPointer(_worldSettingsOffsets, 0x308, out _gameSpeedPointer);
         success &= InitPointer(_mapNameOffsets, 0, out _mapNamePointer);
+        success &= InitPointer(_playerPawnOffsets, 0x440, out _ballTypePointer);
         return success;
     }
 

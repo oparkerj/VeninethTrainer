@@ -75,6 +75,7 @@ public partial class MainWindow : Window
         {
             _zHold = null;
         }
+        _discordManager.SetBallType(_game.CurrentBallType);
         
         if (_gameSpeed.TryGet(out var gameSpeed))
         {

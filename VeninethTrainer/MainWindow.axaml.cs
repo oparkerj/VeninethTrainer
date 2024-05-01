@@ -26,6 +26,8 @@ public partial class MainWindow : Window
 
     private bool _flyForward;
     private float? _zHold;
+    private Vector3F _lastPos;
+    
     private readonly Dictionary<string, TeleportInfo> _teleports = new();
 
     public MainWindow()
@@ -84,8 +86,16 @@ public partial class MainWindow : Window
         }
 
         var newLine = Environment.NewLine;
-        var (x, y, z) = _game.Position;
+        var position = _game.Position;
+        var (x, y, z) = position;
         PositionText.Text = $"{FormatUnits(x)}{newLine}{FormatUnits(y)}{newLine}{FormatUnits(z)}";
+        
+        // Reset Z hold if horizontal position moved
+        if (Math.Abs(x - _lastPos.X) > 0.01f || Math.Abs(y - _lastPos.Y) > 0.01f)
+        {
+            _zHold = null;
+        }
+        _lastPos = position;
 
         var (xv, yv, _) = _game.Velocity;
         var horizontalVelocity = Math.Round(Math.Sqrt(xv * xv + yv * yv), MidpointRounding.ToPositiveInfinity);
